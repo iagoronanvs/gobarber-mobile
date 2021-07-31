@@ -34,6 +34,11 @@ export interface Provider {
   avatar_url: string;
 }
 
+interface AvailabilityItem {
+  hour: number;
+  available: boolean;
+}
+
 const avatar_url =
   'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png';
 
@@ -43,6 +48,7 @@ const CreateAppointment: React.FC = () => {
   const { user } = useAuth();
   const { goBack } = useNavigation();
 
+  const [availability, setAvailability] = useState<AvailabilityItem[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -55,6 +61,20 @@ const CreateAppointment: React.FC = () => {
       setProviders(response.data);
     });
   }, []);
+
+  useEffect(() => {
+    api
+      .get(`providers/${selectedProvider}/day-availability`, {
+        params: {
+          year: selectedDate.getFullYear(),
+          month: selectedDate.getMonth() + 1,
+          day: selectedDate.getDate(),
+        },
+      })
+      .then(response => {
+        setAvailability(response.data);
+      });
+  }, [selectedDate, selectedProvider]);
 
   const navigateBack = useCallback(() => {
     goBack();
@@ -138,6 +158,7 @@ const CreateAppointment: React.FC = () => {
               textColor="#f4ede8"
               display="inline"
               themeVariant="dark"
+              locale="pt-BR"
             />
           </CalendarContainer>
         )}

@@ -1,6 +1,5 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
-  Image,
   View,
   ScrollView,
   KeyboardAvoidingView,
@@ -10,7 +9,9 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'react-native-image-picker';
 import * as Yup from 'yup';
+import Modal from 'react-native-modal';
 
 import { FormHandles } from '@unform/core';
 import Input from '../../components/Input';
@@ -27,6 +28,12 @@ import {
   UserAvatar,
   BackButton,
   UserAvatarContainer,
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalButton,
+  ModalButtonText,
+  ModalCloseButton,
 } from './styles';
 
 import { useAuth } from '../../hooks/auth';
@@ -42,6 +49,8 @@ interface SignUpFormData {
 const Profile: React.FC = () => {
   const { user, updateUser } = useAuth();
   const navigation = useNavigation();
+
+  const [show, setShow] = useState(false);
 
   const formRef = useRef<FormHandles>(null);
   const emailInputRef = useRef<TextInput>(null);
@@ -118,6 +127,86 @@ const Profile: React.FC = () => {
     [navigation],
   );
 
+  const handleToggleModal = useCallback(() => {
+    setShow(show => !show);
+  }, []);
+
+  const handleUpdateAvatar = useCallback(
+    (mode: 'CAMERA' | 'LIBRARY') => {
+      if (mode === 'LIBRARY') {
+        ImagePicker.launchImageLibrary(
+          {
+            mediaType: 'photo',
+          },
+          (response: any) => {
+            setShow(show => !show);
+
+            if (response.didCancel) {
+              return;
+            }
+
+            if (response.error) {
+              Alert.alert('Erro ao atualizar seu avatar');
+              return;
+            }
+
+            const [{ uri, fileName: name }] = response.assets;
+
+            const formData = new FormData();
+
+            formData.append('avatar', {
+              type: 'image/jpeg',
+              name,
+              uri,
+            });
+
+            api.patch('/users/avatar', formData).then(response => {
+              updateUser(response.data);
+            });
+
+            // You can also display the image using data:
+            // const source = { uri: 'data:image/jpeg;base64,' + response.data };
+          },
+        );
+      }
+
+      if (mode === 'CAMERA') {
+        ImagePicker.launchCamera(
+          {
+            mediaType: 'photo',
+          },
+          (response: any) => {
+            setShow(show => !show);
+
+            if (response.didCancel) {
+              return;
+            }
+
+            if (response.error) {
+              Alert.alert('Erro ao atualizar seu avatar');
+              return;
+            }
+
+            const [{ uri, fileName: name }] = response.assets;
+
+            const formData = new FormData();
+
+            formData.append('avatar', {
+              type: 'image/jpeg',
+              name,
+              uri,
+            });
+
+            api.patch('/users/avatar', formData).then(response => {
+              updateUser(response.data);
+            });
+          },
+        );
+      }
+    },
+    [updateUser],
+  );
+
   const handleGoBack = useCallback(() => {
     navigation.goBack();
   }, [navigation]);
@@ -139,7 +228,7 @@ const Profile: React.FC = () => {
             </BackButton>
 
             <UserAvatarContainer>
-              <UserAvatarButton>
+              <UserAvatarButton onPress={handleToggleModal}>
                 <UserAvatar source={{ uri: user.avatar_url }} />
               </UserAvatarButton>
             </UserAvatarContainer>
@@ -218,6 +307,26 @@ const Profile: React.FC = () => {
             </Form>
           </Container>
         </ScrollView>
+
+        <Modal isVisible={show}>
+          <ModalContainer>
+            <ModalHeader>
+              <ModalTitle>Selecione um avatar</ModalTitle>
+              <ModalCloseButton onPress={handleToggleModal}>
+                <Icon name="x" size={18} />
+              </ModalCloseButton>
+            </ModalHeader>
+
+            <ModalButton onPress={() => handleUpdateAvatar('CAMERA')}>
+              <Icon name="camera" size={18} />
+              <ModalButtonText>Usar Câmera</ModalButtonText>
+            </ModalButton>
+            <ModalButton onPress={() => handleUpdateAvatar('LIBRARY')}>
+              <Icon name="image" size={18} />
+              <ModalButtonText>Escolha da galeria</ModalButtonText>
+            </ModalButton>
+          </ModalContainer>
+        </Modal>
       </KeyboardAvoidingView>
     </>
   );

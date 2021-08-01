@@ -48,3 +48,40 @@ export const UserAvatar = styled.Image`
 export const BackButton = styled.TouchableOpacity`
   margin-top: 40px;
 `;
+
+export const ModalContainer = styled.View`
+  background: #ffffff;
+  padding: 22px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border-color: rgba(0, 0, 0, 0.1);
+`;
+
+export const ModalHeader = styled.View`
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-bottom: 16px;
+`;
+
+export const ModalTitle = styled.Text`
+  font-size: 18px;
+`;
+
+export const ModalCloseButton = styled.TouchableOpacity``;
+
+export const ModalButton = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 16px 0;
+  width: 100%;
+`;
+
+export const ModalButtonText = styled.Text`
+  font-size: 16px;
+  margin-left: 8px;
+`;

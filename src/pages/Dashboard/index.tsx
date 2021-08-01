@@ -17,7 +17,7 @@ import {
   ProviderMeta,
   ProviderMetaText,
   ProvidersListTitle,
-}  from './styes';
+} from './styes';
 
 import { useAuth } from '../../hooks/auth';
 import { useNavigation } from '@react-navigation/native';
@@ -29,13 +29,14 @@ export interface Provider {
   avatar_url: string;
 }
 
-const avatar_url = 'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png';
+const avatar_url =
+  'https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_1280.png';
 
 const Dashboard: React.FC = () => {
   const [providers, setProviders] = useState<Provider[]>([]);
 
   const { signOut, user } = useAuth();
-  const {navigate} = useNavigation();
+  const { navigate } = useNavigation();
 
   useEffect(() => {
     api.get('providers').then(response => {
@@ -44,24 +45,26 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const navigateProfile = useCallback(() => {
-    // navigate('Profile');
-    signOut();
-  }, [navigate, signOut]);
-
-  const navigateToCreateAppointment = useCallback((providerId: string) => {
-    navigate('CreateAppointment', { providerId });
+    navigate('Profile');
   }, [navigate]);
+
+  const navigateToCreateAppointment = useCallback(
+    (providerId: string) => {
+      navigate('CreateAppointment', { providerId });
+    },
+    [navigate],
+  );
 
   return (
     <Container>
       <Header>
         <HeaderTitle>
-          Bem Vindo, {"\n"}
+          Bem Vindo, {'\n'}
           <UserName>{user.name}</UserName>
         </HeaderTitle>
 
         <ProfileButton onPress={navigateProfile}>
-          <UserAvatar source={{ uri: user.avatar_url ?? avatar_url }}/>
+          <UserAvatar source={{ uri: user.avatar_url ?? avatar_url }} />
         </ProfileButton>
       </Header>
 
@@ -72,8 +75,12 @@ const Dashboard: React.FC = () => {
           <ProvidersListTitle>Cabeleireiros</ProvidersListTitle>
         )}
         renderItem={({ item: provider }) => (
-          <ProviderContainer onPress={() => navigateToCreateAppointment(provider.id)}>
-            <ProviderAvatar source={{uri: provider.avatar_url ?? avatar_url}} />
+          <ProviderContainer
+            onPress={() => navigateToCreateAppointment(provider.id)}
+          >
+            <ProviderAvatar
+              source={{ uri: provider.avatar_url ?? avatar_url }}
+            />
 
             <ProviderInfo>
               <ProviderName>{provider.name}</ProviderName>
